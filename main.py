@@ -85,9 +85,9 @@ def start():
     global players
     clock = pygame.time.Clock()
     run = True
-    players = [game.Player(WIN), game.RandomBot(WIN)]
-    user = players[0]
-    bot = players[1]
+    user = game.Player(WIN)
+    bot = game.RandomBot(WIN)
+    players = [user, bot]
     GAME = game.Game(WIN)
     GAME.start()
     tick = 0
@@ -135,11 +135,19 @@ def start():
         if keys_pressed[pygame.K_d]:
             user.change_pos((speed, 0))
 
-        check_for_eat(players, GAME)
+        if bot.dead is False:
+            bot.turn()
+        players = []
+        if user.dead is False:
+            players.append(user)
+        if bot.dead is False:
+            players.append(bot)
+        players_copy = players
+        check_for_eat(players_copy, GAME)
 
         check_for_player_eat(players)
 
-        draw_window(players, GAME)
+        draw_window(players_copy, GAME)
     pygame.quit()
 
 
