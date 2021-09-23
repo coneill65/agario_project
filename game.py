@@ -130,8 +130,6 @@ class Game:
         self.window = window
         self.players = []
 
-    def create(self, ):
-
 
     def start(self):
         self.dots = []
