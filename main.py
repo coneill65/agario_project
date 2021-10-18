@@ -41,47 +41,6 @@ def draw_window(draw_me, manager):
     pygame.display.update()
 
 
-def in_circle(player, divide_by, dot):
-    dot_x = dot.pos[0]
-    dot_y = dot.pos[1]
-    player_x = player.pos[0]
-    player_y = player.pos[1]
-    if player.pos[0] + (player.size / divide_by) > dot.pos[0] > player.pos[0] - (player.size / divide_by) and \
-            player.pos[1] + (player.size / divide_by) > dot.pos[1] > player.pos[1] - (player.size / divide_by):
-        if dot_x + dot_y < player_x + player_y:
-            return True
-        elif dot_x - dot_y < player_x - player_y:
-            return True
-        else:
-            return False
-    return False
-
-
-def check_for_eat(players1, game_info):
-    for player in players1:
-        x = -1
-        divide_by = 1.1
-        for dot in game_info.get_dots():
-            x += 1
-            if in_circle(player, divide_by, dot):
-                game_info.delete_dot(x, player)
-
-
-def check_for_player_eat(players1):
-    players2 = players1
-    if len(players2) < 2:
-        return players2
-    for eating_player in players2:
-        x = -1
-        divide_by = 1.1
-        for check_if_eaten_player in players2:
-            x += 1
-            bool_var = in_circle(eating_player, divide_by, check_if_eaten_player)
-            if bool_var is True and eating_player.size > check_if_eaten_player.size * 1.2:
-                check_if_eaten_player.die()
-                eating_player.size += check_if_eaten_player.size * 0.2
-
-
 def start():
     global players
     clock = pygame.time.Clock()
@@ -97,8 +56,10 @@ def start():
     bot7 = game.RandomBot(WIN)
     bot8 = game.RandomBot(WIN)
     bot9 = game.RandomBot(WIN)
-    players = [user, bot, bot1, bot2, bot3, bot4, bot5, bot6, bot7, bot8, bot9]
+    bots = [user, bot, bot1, bot2, bot3, bot4, bot5, bot6, bot7, bot8, bot9]
     GAME = game.Game(WIN)
+    GAME.players = bots
+    bots = bots[1: len(bots) - 1]
     GAME.start()
     tick = 0
     while run:
@@ -145,17 +106,16 @@ def start():
         if keys_pressed[pygame.K_d]:
             user.change_pos((speed, 0))
 
-        if bot.dead is False:
-            bot.turn()
-        players = []
-        if user.dead is False:
-            players.append(user)
-        if bot.dead is False:
-            players.append(bot)
-        players_copy = players
-        check_for_eat(players_copy, GAME)
+        for bot_var in bots:
+            if bot_var.dead is False:
+                bot_var.turn()
 
-        check_for_player_eat(players)
+            bot_var.check_for_eat(GAME)
+        players_copy = bots
+        if user.dead is False:
+            user.check_for_eat(GAME)
+
+        GAME.check_for_player_eat()
 
         draw_window(players_copy, GAME)
     pygame.quit()
